@@ -5,16 +5,17 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using AppRpgEtec.Models;
 using AppRpgEtec.Models.Enuns;
 using AppRpgEtec.Services.Personagens;
 namespace AppRpgEtec.ViewModels.Personagens
 {
-    public class CadastroPersonagemViewlModel : BaseViewModel
+    public class CadastroPersonagemViewModel : BaseViewModel
     {
         public ICommand SalvarCommand { get; }
 
-        public CadastroPersonagemViewlModel()
+        public CadastroPersonagemViewModel()
         {
             string token = Preferences.Get("UsuarioToken", string.Empty);
             pService = new PersonagemService(token);
@@ -34,12 +35,6 @@ namespace AppRpgEtec.ViewModels.Personagens
         private int derrotas;
 
         private PersonagemService pService;
-        public CadastroPersonagemViewlModel()
-        {
-            string token = Preferences.Get("UsuarioToken", string.Empty);
-            pService = new PersonagemService(token);
-            _ = ObterClasses();
-        }
 
         public int Id { get => id; set { id = value; OnPropertyChanged(); } }
         public string Nome { get => nome; set { nome = value; OnPropertyChanged(); } }

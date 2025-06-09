@@ -8,10 +8,14 @@ public partial class ListagemView : ContentPage
 
 	public ListagemView()
 	{
-        InitializeComponent();
+		InitializeComponent();
 
 		viewModel = new ListagemPersonagemViewModel();
 		BindingContext = viewModel;
 		Title = "Personagens - App Rpg Etec";
 	}
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+    }
 }
