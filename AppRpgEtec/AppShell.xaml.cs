@@ -1,4 +1,6 @@
-﻿namespace AppRpgEtec
+﻿using AppRpgEtec.Views.Personagens;
+
+namespace AppRpgEtec
 {
     public partial class AppShell : Shell
     {

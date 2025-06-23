@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -11,10 +12,12 @@ using AppRpgEtec.Models.Enuns;
 using AppRpgEtec.Services.Personagens;
 namespace AppRpgEtec.ViewModels.Personagens
 {
+    [QueryProperty("PersonagemSelecionadoId", "pId")]
     public class CadastroPersonagemViewModel : BaseViewModel
     {
         public ICommand SalvarCommand { get; }
-
+        public ICommand CancelarCommand { get; set; }
+       
         public CadastroPersonagemViewModel()
         {
             string token = Preferences.Get("UsuarioToken", string.Empty);
@@ -22,7 +25,11 @@ namespace AppRpgEtec.ViewModels.Personagens
             _ = ObterClasses();
 
             SalvarCommand = new Command(async () => { await SalvarPersonagem(); });
+            CancelarCommand = new Command(async => CancelarCadastro());
         }
+
+        private async void CancelarCadastro()
+        { await Shell.Current.GoToAsync(".."); }
 
         private int id;
         private string nome;
@@ -44,7 +51,7 @@ namespace AppRpgEtec.ViewModels.Personagens
         public int Inteligencia { get => inteligencia; set { inteligencia = value; OnPropertyChanged(); } }
         public int Disputas { get => disputas; set { disputas = value; OnPropertyChanged(); } }
         public int Vitorias { get => vitorias; set { vitorias = value; OnPropertyChanged(); } }
-        public int Derrotas { get => derrotas; set { derrotas = value; OnPropertyChanged();}}
+        public int Derrotas { get => derrotas; set { derrotas = value; OnPropertyChanged(); } }
 
         private ObservableCollection<TipoClasse> listaTipoClasse;
         public ObservableCollection<TipoClasse> ListaTiposClasse
@@ -91,6 +98,8 @@ namespace AppRpgEtec.ViewModels.Personagens
             }
         }
 
+        public string PersonagemSelecionadoId { get; set; }
+
         public async Task SalvarPersonagem()
         {
             try
@@ -110,19 +119,57 @@ namespace AppRpgEtec.ViewModels.Personagens
                 };
                 if (model.Id == 0)
                     await pService.PostPersonagemAsync(model);
+                else
+                    await pService.PutPersonagemAsync(model);
 
-                await Application.Current.MainPage
-                        .DisplayAlert("Mensagem", "Dados salvos com sucesso!", "Ok");
+                    await Application.Current.MainPage
+                            .DisplayAlert("Mensagem", "Dados salvos com sucesso!", "Ok");
 
                 await Shell.Current.GoToAsync("..");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 await Application.Current.MainPage
                         .DisplayAlert("Ops", ex.Message + "Detalhes: " + ex.InnerException, "Ok");
             }
         }
+        public async void CarregarPersonagem()
+        {
+            try
+            {
+                Personagem p = await
+                    pService.GetPersonagemAsync(int.Parse(PersonagemSelecionadoId));
+                this.Nome = p.Nome;
+                this.PontosVida = p.PontosVida;
+                this.Defesa = p.Defesa;
+                this.Derrotas = p.Derrotas;
+                this.Disputas = p.Disputas;
+                this.Forca = p.Forca;
+                this.Inteligencia = p.Inteligencia;
+                this.Vitorias = p.Vitorias;
+                this.Id = p.Id;
 
+                TipoClasseSelecionado = this.ListaTiposClasse.FirstOrDefault(tClasse => tClasse.Id == (int)p.Classe);
 
+            }
+
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Ops", ex.Message + "Detalhes: " + ex.InnerException, "ok");
+            }
+
+        }
+        private string personagemSelecionadoId 
+        {
+            set
+            {
+                if (value == null)
+                {
+                    personagemSelecionadoId = Uri.UnescapeDataString(value);
+                    CarregarPersonagem();
+
+                }
+            }
+        }
     }
 }
