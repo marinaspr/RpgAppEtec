@@ -25,10 +25,11 @@ namespace AppRpgEtec.ViewModels.Personagens
             _ = ObterClasses();
 
             SalvarCommand = new Command(async () => { await SalvarPersonagem(); });
-            CancelarCommand = new Command(async => CancelarCadastro());
+            CancelarCommand = new Command(async () => { await CancelarCadastro(); });
+
         }
 
-        private async void CancelarCadastro()
+        private async Task CancelarCadastro()
         { await Shell.Current.GoToAsync(".."); }
 
         private int id;
@@ -159,17 +160,17 @@ namespace AppRpgEtec.ViewModels.Personagens
             }
 
         }
-        private string personagemSelecionadoId 
+        public string personagemSelecionadoId
+            
         {
+            get => personagemSelecionadoId;
             set
             {
-                if (value == null)
-                {
-                    personagemSelecionadoId = Uri.UnescapeDataString(value);
-                    CarregarPersonagem();
-
-                }
+                personagemSelecionadoId = Uri.UnescapeDataString(value);
+                CarregarPersonagem();
             }
         }
+
     }
 }
+

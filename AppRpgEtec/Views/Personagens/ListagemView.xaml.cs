@@ -1,4 +1,5 @@
 using AppRpgEtec.ViewModels.Personagens;
+using System.Threading.Tasks;
 
 namespace AppRpgEtec.Views.Personagens;
 
@@ -14,9 +15,23 @@ public partial class ListagemView : ContentPage
 		BindingContext = viewModel;
 		Title = "Personagens - App Rpg Etec";
 	}
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-		_ = viewModel.ObterPersonagens();
+
+        try
+        {
+            var viewModel = BindingContext as ListagemPersonagemViewModel;
+            if (viewModel != null)
+            {
+                await viewModel.InicializarAsync();
+                _ = viewModel.ObterPersonagens();
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Erro", $"Falha ao carregar personagens: {ex.Message}", "OK");
+        }
     }
+
 }

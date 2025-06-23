@@ -15,30 +15,41 @@ namespace AppRpgEtec.ViewModels.Personagens
     {
         private PersonagemService pService;
         public ObservableCollection<Personagem> Personagens { get; set; }
-        public Command NovoPersonagem { get; }
+        //public Command NovoPersonagem { get; }
 
-        private Personagem PersonagemSelecionado
+        private Personagem _personagemSelecionado;
+        public Personagem PersonagemSelecionado
         {
-            get { return PersonagemSelecionado; }
+            get => _personagemSelecionado;
             set
             {
-                PersonagemSelecionado = value;
-                Shell.Current.GoToAsync($"cadPersonagemView?pId={PersonagemSelecionado.Id}");
+                if (_personagemSelecionado != value)
+                {
+                    _personagemSelecionado = value;
+                    OnPropertyChanged();
+
+                    if (_personagemSelecionado != null)
+                    {
+                        Shell.Current.GoToAsync($"cadPersonagemView?pId={_personagemSelecionado.Id}");
+                    }
+                }
             }
         }
         public ListagemPersonagemViewModel()
         {
-            string token = Preferences.Get("UsuarioToken", string.Empty);
-            pService = new PersonagemService(token);
             Personagens = new ObservableCollection<Personagem>();
-
-            _ = ObterPersonagens();
-            NovoPersonagem = new Command(async () => { await ExibirCadastroPersonagem(); });
+            //NovoPersonagem = new Command(async () => { await ExibirCadastroPersonagem(); });
+            NovoPersonagemCommand = new Command(async () => await ExibirCadastroPersonagem());
             RemoverPersonagemCommand = new Command<Personagem>(async (Personagem p) => { await RemoverPersonagem(p); });
         }
             public ICommand NovoPersonagemCommand { get; }
         public ICommand RemoverPersonagemCommand { get; set; }
-
+        public async Task InicializarAsync()
+        {
+            string token = Preferences.Get("UsuarioToken", string.Empty);
+            pService = new PersonagemService(token);
+            await ObterPersonagens();
+        }
         public async Task ObterPersonagens()
         {
             try
@@ -55,7 +66,11 @@ namespace AppRpgEtec.ViewModels.Personagens
         {
             try
             {
-                await Shell.Current.GoToAsync("cadPersonagemView");
+                if (Shell.Current != null)
+                {
+                    await Shell.Current.GoToAsync("cadPersonagemView");
+                }
+
             }
             catch (Exception ex)
             {
